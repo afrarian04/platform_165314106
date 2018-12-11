@@ -9,15 +9,25 @@ and open the template in the editor.
         <title>Rumah Sakitku</title>
 
         <style>
-            #map {
-                height: 400px;
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
                 width: 100%;
             }
-            /* Optional: Makes the sample page fill the window. */
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
+
+            td, th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding-top: 12px;
+                padding-bottom: 12px;
+            }
+
+            tr:nth-child(even) {
+                background-color: #a5c422;
+                border-radius: 3px;
+                color: #ffffff;
+                font-weight: 600;
+
             }
         </style>
 
@@ -80,48 +90,112 @@ and open the template in the editor.
                         <li><a href="home.html" class="smoothScroll">Beranda</a></li>
                         <li><a href="#about" class="smoothScroll">Tentang Kita</a></li>
                         <li><a href="DokterSpesialis.html" class="smoothScroll">Dokter Spesialis</a></li>
-                        <li><a href="DaftarKlinik.html" class="smoothScroll">Daftar Klinik</a></li>
+                        <li><a href="lokasi.html" class="smoothScroll">Lokasi</a></li>
                         <li><a href="Antrian.html" class="smoothScroll">Daftar Antri</a></li>
-                        <li class="appointment-btn"><a href="DaftarPasien.html">Buat Janji Pendaftaran</a></li>
+                        <li class="appointment-btn"><a href="DaftarPasien.html">Daftarkan Dirimu</a></li>
                     </ul>
                 </div>
 
             </div>
         </section>
-        
+
+        <!-- MAKE AN APPOINTMENT -->
         <section id="appointment" data-stellar-background-ratio="3">
             <div class="container">
-                <div id="map">
-                    
+                <div class="row">
+
+                    <div class="col-md-6 col-sm-6">
+                        <button onclick="loadKlinik()">Refresh</button>
+                        <div id="klinik" class="smoothScroll"></div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-6">
+                        <!-- CONTACT FORM HERE -->
+                        <form id="appointment-form" role="form" method="post" onsubmit="addKlinik(this)">
+
+                            <!-- SECTION TITLE -->
+                            <div class="section-title wow fadeInUp" data-wow-delay="0.4s">
+                                <h2>Daftar Klinik Baru</h2>
+                            </div>
+
+                            <div class="wow fadeInUp" data-wow-delay="0.8s">
+                                <div class="col-md-6 col-sm-6">
+                                    <label for="idKlinik">Id Klinik</label>
+                                    <input type="text" class="form-control" id="idKlinik" placeholder="Id Klinik">
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+                                    <label for="nama">Nama</label>
+                                    <input type="text" class="form-control" id="nama" placeholder="Nama">
+                                </div>
+
+                                <div class="col-md-12 col-sm-12">
+                                    <label for="spesialis">Spesialis</label>
+                                    <input type="text" class="form-control" id="spesialis" placeholder="Spesialis">
+                                    <button type="submit" class="form-control" id="cf-submit">Daftar Klinik</button>
+                                    <pre id="berhasil">
+                                    </pre>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             </div>
-        </section>        
-        
-        <
+        </section>
+
+
         <script>
-            var map;
-            var url = "http://202.94.83.190:8080/165314106_WebService/webresources/location";
-            var xhttp = new XMLHttpRequest(); 
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    var obj = JSON.parse(this.responseText);
-                    map = new google.maps.Map(document.getElementById('map'), {
-                        center: {lat: obj[0].lat, lng: obj[0].lng},
-                        zoom: 8
-                    });
-                    var marker = [];
-                    for (var i = 0; i < obj.length; i++) {
-                        marker[i] = new google.maps.Marker({position: {lat: obj[i].lat, lng: obj[i].lng}, map: map});
+
+            function loadKlinik() {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "http://202.94.83.190:8080/165314106_WebService/webresources/klinik";
+                xmlhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        myFunction(this.responseText);
                     }
                 }
-            };
-            xhttp.open("GET", url, true);
-            xhttp.send();
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+                function myFunction(response) {
+                    var arr = JSON.parse(response);
+                    var i;
+                    var out = "<table border='1'>";
+                    var out = "<table style='width:50%' ><tr><th>Id Klinik</th><th>Nama Klinik</th><th>Spesialis</th></tr>"
+                    for (i = 0; i < arr.length; i++) {
+                        out += "<tr><td>" +
+                                arr[i].idKlinik +
+                                "</td><td>" +
+                                arr[i].nama +
+                                "</td><td>" +
+                                arr[i].spesialis +
+                                "</td></tr>";
+                    }
+                    out += "</table>";
+                    document.getElementById("klinik").innerHTML = out;
+                }
+
+            }
+            
+            function addKlinik(form) {
+                var json = {
+                    "idKlinik": form.idKlinik.value,
+                    "nama": form.nama.value,
+                    "spesialis": form.spesialis.value
+                };
+                var html = JSON.stringify(json, 0, 100);
+                var Url = "http://202.94.83.190:8080/165314106_WebService/webresources/klinik/addKlinik";
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', Url, false);
+                xhr.setRequestHeader("Content-type", "application/json");
+                xhr.send(html);
+                
+                document.getElementById("berhasil").innerHTML = "Berhasil Tambah Dokter";
+                return false;
+            }
+
+
         </script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnD2l64I6G6fUkPpc3D79Jcau30v8xEKE&callback=initMap"
-        async defer></script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnD2l64I6G6fUkPpc3D79Jcau30v8xEKE&callback=initMap"
-        async defer></script>
 
         <footer data-stellar-background-ratio="5">
             <div class="container">

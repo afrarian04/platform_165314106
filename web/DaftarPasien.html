@@ -9,15 +9,25 @@ and open the template in the editor.
         <title>Rumah Sakitku</title>
 
         <style>
-            #map {
-                height: 400px;
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
                 width: 100%;
             }
-            /* Optional: Makes the sample page fill the window. */
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
+
+            td, th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding-top: 12px;
+                padding-bottom: 12px;
+            }
+
+            tr:nth-child(even) {
+                background-color: #a5c422;
+                border-radius: 3px;
+                color: #ffffff;
+                font-weight: 600;
+
             }
         </style>
 
@@ -81,47 +91,138 @@ and open the template in the editor.
                         <li><a href="#about" class="smoothScroll">Tentang Kita</a></li>
                         <li><a href="DokterSpesialis.html" class="smoothScroll">Dokter Spesialis</a></li>
                         <li><a href="DaftarKlinik.html" class="smoothScroll">Daftar Klinik</a></li>
+                        <li><a href="lokasi.html" class="smoothScroll">Lokasi</a></li>
                         <li><a href="Antrian.html" class="smoothScroll">Daftar Antri</a></li>
-                        <li class="appointment-btn"><a href="DaftarPasien.html">Buat Janji Pendaftaran</a></li>
                     </ul>
                 </div>
 
             </div>
         </section>
-        
+
+        <!-- MAKE AN APPOINTMENT -->
         <section id="appointment" data-stellar-background-ratio="3">
             <div class="container">
-                <div id="map">
-                    
+                <div class="row">
+
+                    <div class="col-md-6 col-sm-6">
+                        <button onclick="loadPasien()">Refresh</button>
+                        <div id="pasien" class="smoothScroll"></div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-6">
+                        <!-- CONTACT FORM HERE -->
+                        <form id="appointment-form" onsubmit="addPasien(this)" role="form" method="post">
+
+                            <!-- SECTION TITLE -->
+                            <div class="section-title wow fadeInUp" data-wow-delay="0.4s">
+                                <h2>Daftar Pasien Baru</h2>
+                            </div>
+
+                            <div class="wow fadeInUp" data-wow-delay="0.8s">
+                                <div class="col-md-6 col-sm-6">
+                                    <label>No Rekam Medis</label>
+                                    <input type="text" class="form-control" id="noRm" placeholder="No Rekam Medis">
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+                                    <label>Nama</label>
+                                    <input type="text" class="form-control" id="nama" placeholder="Nama Pasien">
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+                                    <label>Alamat</label>
+                                    <input type="text" class="form-control" id="alamat" placeholder="Alamat">
+                                </div> 
+
+                                <div class="col-md-6 col-sm-6">
+                                    <label>NIK</label>
+                                    <input type="text" class="form-control" id="nik" placeholder="NIK">
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+                                    <label>Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="tanggalLahir">
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+                                    <label>Kelamin</label>
+                                    <input type="text" class="form-control" id="kelamin">
+                                </div>
+
+                                <div class="col-md-12 col-sm-12">
+                                    <button type="submit" class="form-control" id="cf-submit">Daftar Pasien</button>
+                                    <pre id="berhasil">
+                                    </pre>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             </div>
-        </section>        
-        
-        <
+        </section>
+
+
         <script>
-            var map;
-            var url = "http://202.94.83.190:8080/165314106_WebService/webresources/location";
-            var xhttp = new XMLHttpRequest(); 
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    var obj = JSON.parse(this.responseText);
-                    map = new google.maps.Map(document.getElementById('map'), {
-                        center: {lat: obj[0].lat, lng: obj[0].lng},
-                        zoom: 8
-                    });
-                    var marker = [];
-                    for (var i = 0; i < obj.length; i++) {
-                        marker[i] = new google.maps.Marker({position: {lat: obj[i].lat, lng: obj[i].lng}, map: map});
+
+            function loadPasien() {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "http://202.94.83.190:8080/165314106_WebService/webresources/pasien";
+                xmlhttp.onreadystatechange = function () {
+                    if (this.readyState === 4 && this.status === 200) {
+                        myFunction(this.responseText);
                     }
+                };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+                function myFunction(response) {
+                    var arr = JSON.parse(response);
+                    var i;
+                    var out = "<table border='1'>";
+                    var out = "<table style='width:50%' ><tr><th>No RM</th><th>Nama</th><th>Alamat</th><th>NIK</th><th>Tanggal Lahir</th><th>Kelamin</th></tr>";
+                    for (i = 0; i < arr.length; i++) {
+                        out += "<tr><td>" +
+                                arr[i].noRm +
+                                "</td><td>" +
+                                arr[i].nama +
+                                "</td><td>" +
+                                arr[i].alamat +
+                                "</td><td>" +
+                                arr[i].nik +
+                                "</td><td>" +
+                                arr[i].tanggalLahir +
+                                "</td><td>" +
+                                arr[i].kelamin +
+                                "</td></tr>";
+                    }
+                    out += "</table>";
+                    document.getElementById("pasien").innerHTML = out;
                 }
-            };
-            xhttp.open("GET", url, true);
-            xhttp.send();
+
+            }
+
+            function addPasien(form) {
+                var json = {
+                    "noRm": form.noRm.value,
+                    "nama": form.nama.value,
+                    "alamat": form.alamat.value,
+                    "nik": form.nik.value,
+                    "tanggalLahir": form.tanggalLahir.value,
+                    "kelamin": form.kelamin.value
+                };
+                var html = JSON.stringify(json, 0, 100);
+                var Url = "http://202.94.83.190:8080/165314106_WebService/webresources/pasien/addPasien";
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', Url, false);
+                xhr.setRequestHeader("Content-type", "application/json");
+                xhr.send(html);
+                
+                document.getElementById("berhasil").innerHTML = "Berhasil Tambah Pasien";
+                return false;
+            }
+
+
         </script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnD2l64I6G6fUkPpc3D79Jcau30v8xEKE&callback=initMap"
-        async defer></script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnD2l64I6G6fUkPpc3D79Jcau30v8xEKE&callback=initMap"
-        async defer></script>
 
         <footer data-stellar-background-ratio="5">
             <div class="container">
